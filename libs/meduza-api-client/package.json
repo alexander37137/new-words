@@ -1,5 +1,5 @@
 {
-  "name": "@new-words/data-access-db",
+  "name": "@new-words/meduza-api-client",
   "version": "0.0.1",
   "private": true,
   "type": "commonjs",

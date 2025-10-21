@@ -15,7 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@new-words/data-access-db": ["libs/data-access-db/src/index.ts"]
+      "@new-words/meduza-api-client": ["libs/meduza-api-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
