@@ -1,7 +1,5 @@
 import { MeduzaRepository } from '@new-words/meduza-api-client';
 
-console.log('Script started');
-
 async function main() {
   try {
     console.log('Starting Meduza article counter...');
@@ -18,7 +16,6 @@ async function main() {
   }
 }
 
-// Run main directly
 main().catch(error => {
   console.error('Unhandled promise rejection:', error);
   process.exit(1);
