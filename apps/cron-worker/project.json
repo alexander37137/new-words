@@ -1,7 +1,7 @@
 {
   "name": "cron-worker",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "cron-worker/src",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/cron-worker/src",
   "projectType": "application",
   "tags": ["type:worker"],
   "targets": {
@@ -11,12 +11,12 @@
       "defaultConfiguration": "production",
       "options": {
         "platform": "node",
-        "outputPath": "dist/cron-worker",
+        "outputPath": "dist/apps/cron-worker",
         "format": ["cjs"],
         "bundle": false,
-        "main": "cron-worker/src/main.ts",
-        "tsConfig": "cron-worker/tsconfig.app.json",
-        "assets": ["cron-worker/src/assets"],
+        "main": "apps/cron-worker/src/main.ts",
+        "tsConfig": "apps/cron-worker/tsconfig.app.json",
+        "assets": ["apps/cron-worker/src/assets"],
         "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
@@ -42,8 +42,8 @@
       "cache": true,
       "executor": "@nx/js:prune-lockfile",
       "outputs": [
-        "{workspaceRoot}/dist/cron-worker/package.json",
-        "{workspaceRoot}/dist/cron-worker/package-lock.json"
+        "{workspaceRoot}/dist/apps/cron-worker/package.json",
+        "{workspaceRoot}/dist/apps/cron-worker/package-lock.json"
       ],
       "options": {
         "buildTarget": "build"
@@ -52,7 +52,7 @@
     "copy-workspace-modules": {
       "dependsOn": ["build"],
       "cache": true,
-      "outputs": ["{workspaceRoot}/dist/cron-worker/workspace_modules"],
+      "outputs": ["{workspaceRoot}/dist/apps/cron-worker/workspace_modules"],
       "executor": "@nx/js:copy-workspace-modules",
       "options": {
         "buildTarget": "build"
@@ -87,7 +87,7 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "cron-worker/jest.config.ts",
+        "jestConfig": "apps/cron-worker/jest.config.ts",
         "passWithNoTests": true
       }
     }

@@ -1,0 +1,30 @@
+{
+  "name": "data-access-db",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/data-access-db/src",
+  "projectType": "library",
+  "tags": ["type:data"],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/data-access-db",
+        "tsConfig": "libs/data-access-db/tsconfig.lib.json",
+        "packageJson": "libs/data-access-db/package.json",
+        "main": "libs/data-access-db/src/index.ts",
+        "assets": ["libs/data-access-db/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/data-access-db/jest.config.ts"
+      }
+    }
+  }
+}
