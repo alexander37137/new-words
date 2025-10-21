@@ -1,4 +1,5 @@
 import Redis from 'ioredis';
+import { decode } from 'he';
 
 export interface WordCountRepositoryOptions {
   host?: string;
@@ -93,5 +94,43 @@ export class WordCountRepository {
 
   async disconnect(): Promise<void> {
     await this.redis.disconnect();
+  }
+
+  /**
+   * Extract words from text and increment their counts in Redis
+   */
+  async processText(text: string): Promise<number> {
+    const words = this.extractWords(text);
+    let totalProcessed = 0;
+
+    for (const word of words) {
+      await this.incrementWordCount(word);
+      totalProcessed++;
+    }
+
+    return totalProcessed;
+  }
+
+  /**
+   * Extract clean words from text content
+   */
+  private extractWords(text: string): string[] {
+    // Decode HTML entities using the 'he' library
+    const decodedText = decode(text);
+
+    // Remove HTML tags and CDATA
+    const cleanText = decodedText
+      .replace(/<!\[CDATA\[|\]\]>/g, '') // Remove CDATA tags
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/[^\w\s-]/g, ' ') // Keep word chars, spaces, hyphens
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .toLowerCase()
+      .trim();
+
+    // Split by whitespace and filter
+    return cleanText
+      .split(/\s+/)
+      .filter(word => word.length > 2 && word.length < 50)
+      .filter(word => !/^\d+$/.test(word));
   }
 }

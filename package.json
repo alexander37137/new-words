@@ -11,6 +11,7 @@
   "private": true,
   "dependencies": {
     "empty": "0.10.1",
+    "he": "^1.2.0",
     "ioredis": "^5.8.2"
   },
   "devDependencies": {
