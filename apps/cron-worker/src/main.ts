@@ -1,5 +1,5 @@
 import { MeduzaRepository } from '@new-words/meduza-api-client';
-import { WordCountRepository } from '@new-words/word-count-db';
+import { WordCountRepository } from '@new-words/db-client';
 
 function extractWords(text: string): string[] {
   // Remove HTML tags, punctuation, and normalize

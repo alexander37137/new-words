@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "paths": {
       "@new-words/meduza-api-client": ["libs/meduza-api-client/src/index.ts"],
-      "@new-words/word-count-db": ["libs/word-count-db/src/index.ts"]
+      "@new-words/db-client": ["libs/db-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
