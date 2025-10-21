@@ -1,19 +1,44 @@
 import { MeduzaRepository } from '@new-words/meduza-api-client';
 import { WordCountRepository } from '@new-words/db-client';
 
+function decodeHtmlEntities(text: string): string {
+  // Create a temporary DOM element to leverage browser's HTML entity decoding
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = text;
+    return textarea.value;
+  }
+
+  // Fallback for Node.js: basic entity decoding
+  return text
+    .replace(/&#x([0-9a-f]+);/gi, (match, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(parseInt(dec, 10)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ');
+}
+
 function extractWords(text: string): string[] {
-  // Remove HTML tags, punctuation, and normalize
-  const cleanText = text
+  // Decode HTML entities first
+  const decodedText = decodeHtmlEntities(text);
+
+  // Remove HTML tags and CDATA
+  const cleanText = decodedText
+    .replace(/<!\[CDATA\[|\]\]>/g, '') // Remove CDATA tags
     .replace(/<[^>]*>/g, '') // Remove HTML tags
-    .replace(/[^\w\s]/g, ' ') // Replace punctuation with spaces
+    .replace(/[^\p{L}\p{M}\s-]/gu, ' ') // Keep letters, marks, spaces, hyphens
+    .replace(/\s+/g, ' ') // Normalize whitespace
     .toLowerCase()
     .trim();
 
-  // Split by whitespace and filter out empty strings and very short words
+  // Split by whitespace and filter
   return cleanText
     .split(/\s+/)
-    .filter(word => word.length > 2 && word.length < 50) // Reasonable word length
-    .filter(word => !/^\d+$/.test(word)); // Filter out pure numbers
+    .filter(word => word.length > 2 && word.length < 50)
+    .filter(word => !/^\d+$/.test(word));
 }
 
 async function processArticlesForWords(repository: WordCountRepository): Promise<void> {
