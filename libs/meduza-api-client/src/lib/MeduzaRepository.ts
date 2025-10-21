@@ -29,7 +29,7 @@ const DEFAULT_BASE_URL = 'https://meduza.io/rss/all';
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36';
 
 export class MeduzaRepository {
-  private readonly baseUrl: string;
+  public readonly baseUrl: string;
   private readonly userAgent: string;
   private readonly fetchFn: typeof fetch;
 

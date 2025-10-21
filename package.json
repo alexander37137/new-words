@@ -2,10 +2,16 @@
   "name": "@new-words/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "redis:start": "docker-compose up -d",
+    "redis:stop": "docker-compose down",
+    "redis:logs": "docker-compose logs redis",
+    "redis:cli": "docker-compose exec redis redis-cli"
+  },
   "private": true,
   "dependencies": {
-    "empty": "0.10.1"
+    "empty": "0.10.1",
+    "ioredis": "^5.8.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
