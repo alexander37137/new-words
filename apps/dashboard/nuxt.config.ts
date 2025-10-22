@@ -1,8 +1,10 @@
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { defineNuxtConfig } from 'nuxt/config';
 
-// Disable vue-macros to avoid module.createRequire error in build
-process.env.NUXT_DISABLE_VUE_MACROS = 'true';
+// Disable vue-macros to avoid module.createRequire error
+if (typeof process !== 'undefined') {
+  process.env.NUXT_DISABLE_VUE_MACROS = 'true';
+}
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
