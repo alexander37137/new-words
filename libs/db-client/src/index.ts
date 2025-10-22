@@ -1,1 +1,1 @@
-export * from './lib/word-count-db';
+export * from './lib/WordCountRepository';
