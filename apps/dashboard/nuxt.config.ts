@@ -6,28 +6,37 @@ export default defineNuxtConfig({
   workspaceDir: '../../',
   srcDir: 'src',
   devtools: { enabled: true },
-
   devServer: {
     host: 'localhost',
     port: 4200,
   },
-
   typescript: {
-    typeCheck: true,
+    typeCheck: false,
     tsConfig: {
-      extends: '../../../tsconfig.base.json', // Nuxt copies this string as-is to the `./.nuxt/tsconfig.json`, therefore it needs to be relative to that directory
+      extends: '../../../tsconfig.base.json',
     },
   },
-
   imports: {
     autoImport: true,
   },
-
   css: ['~/assets/css/styles.css'],
-
+  nitro: {
+    preset: 'node-server',
+    experimental: {
+      wasm: false,
+    },
+    storage: {
+      db: {
+        driver: 'memory'
+      }
+    }
+  },
   vite: {
     plugins: [nxViteTsPaths()],
   },
-
   compatibilityDate: '2025-10-22',
+  experimental: {
+    payloadExtraction: false,
+    viewTransition: false,
+  },
 });

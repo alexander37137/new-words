@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "redis:start": "docker-compose up -d",
-    "redis:stop": "docker-compose down",
-    "redis:logs": "docker-compose logs redis",
-    "redis:cli": "docker-compose exec redis redis-cli"
+    "redis:start": "docker compose up -d",
+    "redis:stop": "docker compose down",
+    "redis:logs": "docker compose logs redis",
+    "redis:cli": "docker compose exec redis redis-cli"
   },
   "private": true,
   "dependencies": {
