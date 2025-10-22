@@ -13,15 +13,17 @@ export class ArticleProcessorService {
 
   /**
    * Process articles from Meduza RSS feed and extract words
+   * @param date Optional date in YYYY-MM-DD format. If not provided, processes today's articles.
    */
-  async processTodayArticles(): Promise<{
+  async processTodayArticles(date?: string): Promise<{
     wordsProcessed: number;
   }> {
-    console.log('Fetching articles from Meduza RSS feed...');
+    const dateLabel = date ? `for ${date}` : 'for today';
+    console.log(`Fetching articles from Meduza RSS feed ${dateLabel}...`);
 
     try {
       // Process words from RSS feed
-      const wordsProcessed = await this.processWordsFromRss();
+      const wordsProcessed = await this.processWordsFromRss(date);
 
       console.log(`✅ Processed ${wordsProcessed} words from articles`);
 
@@ -34,8 +36,9 @@ export class ArticleProcessorService {
 
   /**
    * Extract and process words from Meduza RSS feed
+   * @param date Optional date in YYYY-MM-DD format for filtering articles
    */
-  private async processWordsFromRss(): Promise<number> {
+  private async processWordsFromRss(date?: string): Promise<number> {
     const rssResponse = await fetch(this.meduzaRepo.baseUrl);
     const rssText = await rssResponse.text();
 
@@ -45,18 +48,47 @@ export class ArticleProcessorService {
 
     let totalWords = 0;
 
-    // Process titles
-    for (const titleMatch of titleMatches) {
-      const titleText = titleMatch.replace(/<\/?title>/g, '');
-      const wordsProcessed = await this.wordRepo.processText(titleText);
-      totalWords += wordsProcessed;
-    }
+    // If date is provided, filter articles by publication date
+    if (date) {
+      // Extract pubDate elements to filter by date
+      const pubDateMatches = rssText.match(/<pubDate>(.*?)<\/pubDate>/g) || [];
+      const targetDate = new Date(date).getTime();
+      const dateStart = targetDate;
+      const dateEnd = targetDate + 24 * 60 * 60 * 1000; // Next day
 
-    // Process descriptions
-    for (const descMatch of descriptionMatches) {
-      const descText = descMatch.replace(/<\/?description>/g, '');
-      const wordsProcessed = await this.wordRepo.processText(descText);
-      totalWords += wordsProcessed;
+      for (let i = 0; i < pubDateMatches.length; i++) {
+        const pubDateText = pubDateMatches[i].replace(/<\/?pubDate>/g, '');
+        const pubDate = new Date(pubDateText).getTime();
+
+        // Check if article is within the target date range
+        if (pubDate >= dateStart && pubDate < dateEnd) {
+          if (titleMatches[i]) {
+            const titleText = titleMatches[i].replace(/<\/?title>/g, '');
+            const wordsProcessed = await this.wordRepo.processText(titleText);
+            totalWords += wordsProcessed;
+          }
+          if (descriptionMatches[i]) {
+            const descText = descriptionMatches[i].replace(/<\/?description>/g, '');
+            const wordsProcessed = await this.wordRepo.processText(descText);
+            totalWords += wordsProcessed;
+          }
+        }
+      }
+    } else {
+      // Process all articles if no date filter
+      // Process titles
+      for (const titleMatch of titleMatches) {
+        const titleText = titleMatch.replace(/<\/?title>/g, '');
+        const wordsProcessed = await this.wordRepo.processText(titleText);
+        totalWords += wordsProcessed;
+      }
+
+      // Process descriptions
+      for (const descMatch of descriptionMatches) {
+        const descText = descMatch.replace(/<\/?description>/g, '');
+        const wordsProcessed = await this.wordRepo.processText(descText);
+        totalWords += wordsProcessed;
+      }
     }
 
     return totalWords;
