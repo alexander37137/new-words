@@ -62,8 +62,11 @@
       </div>
 
       <div class="actions">
-        <button @click="refresh" class="refresh-btn" :disabled="pending">
+        <button @click="refresh" class="refresh-btn" :disabled="pending || clearing">
           {{ pending ? 'Loading...' : '🔄 Refresh Data' }}
+        </button>
+        <button @click="clearDatabase" class="clear-btn" :disabled="pending || clearing">
+          {{ clearing ? 'Clearing...' : '🗑️ Clear Database' }}
         </button>
       </div>
     </div>
@@ -72,11 +75,29 @@
 
 <script setup lang="ts">
 const { data, pending, error, refresh } = await useFetch('/api/stats')
+const clearing = ref(false)
 
 const getBarWidth = (count: number) => {
   if (!data.value?.topWords?.length) return '0%'
   const maxCount = data.value.topWords[0].count
   return `${(count / maxCount) * 100}%`
+}
+
+const clearDatabase = async () => {
+  if (!confirm('Are you sure you want to delete all data from the database? This cannot be undone.')) {
+    return
+  }
+  
+  clearing.value = true
+  try {
+    await $fetch('/api/clear', { method: 'POST' })
+    await refresh()
+  } catch (err) {
+    console.error('Error clearing database:', err)
+    alert('Failed to clear database')
+  } finally {
+    clearing.value = false
+  }
 }
 </script>
 
@@ -260,8 +281,11 @@ const getBarWidth = (count: number) => {
 }
 
 .actions {
-  text-align: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
   margin-top: 3rem;
+  flex-wrap: wrap;
 }
 
 .refresh-btn {
@@ -282,6 +306,28 @@ const getBarWidth = (count: number) => {
 }
 
 .refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.clear-btn {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.clear-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.clear-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
