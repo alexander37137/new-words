@@ -1,8 +1,7 @@
 import { ArticleProcessorService } from './services/ArticleProcessorService';
 
 async function runWordCounter(date?: string): Promise<{
-  totalUniqueWords: number;
-  topWords: Array<{ word: string; count: number }>;
+  wordsProcessed: number;
 }> {
   // Initialize service (it creates its own repositories internally)
   const articleProcessor = new ArticleProcessorService();
@@ -11,10 +10,7 @@ async function runWordCounter(date?: string): Promise<{
     // Process words from articles using the service
     const { wordsProcessed } = await articleProcessor.processTodayArticles(date);
 
-    // Get word statistics using the service
-    const stats = await articleProcessor.getWordStats();
-
-    return stats;
+    return { wordsProcessed };
   } finally {
     await articleProcessor.disconnect();
   }
@@ -39,24 +35,16 @@ async function main() {
         process.exit(1);
       }
       console.log(`📝 Starting Meduza word counter for date: ${dateArg}...`);
-      const { totalUniqueWords, topWords } = await runWordCounter(dateArg);
+      const { wordsProcessed } = await runWordCounter(dateArg);
 
-      console.log(`📊 Total unique words: ${totalUniqueWords}`);
-      console.log('🔝 Top 10 words:');
-      topWords.forEach(({ word, count }, index) => {
-        console.log(`  ${index + 1}. "${word}": ${count}`);
-      });
+      console.log(`📊 Words processed: ${wordsProcessed}`);
     } else {
       // Run for yesterday by default
       const yesterday = getDateString(1);
       console.log(`📝 Starting Meduza word counter for yesterday: ${yesterday}...`);
-      const { totalUniqueWords, topWords } = await runWordCounter(yesterday);
+      const { wordsProcessed } = await runWordCounter(yesterday);
 
-      console.log(`📊 Total unique words: ${totalUniqueWords}`);
-      console.log('🔝 Top 10 words:');
-      topWords.forEach(({ word, count }, index) => {
-        console.log(`  ${index + 1}. "${word}": ${count}`);
-      });
+      console.log(`📊 Words processed: ${wordsProcessed}`);
     }
 
     console.log('\n✅ Done!');

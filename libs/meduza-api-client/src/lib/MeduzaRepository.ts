@@ -79,6 +79,72 @@ export class MeduzaRepository {
     return totalToday;
   }
 
+  /**
+   * Search for articles on a specific date using Meduza RSS feed with pagination
+   * @param dateStr Date in YYYY-MM-DD format
+   * @returns Array of articles with title and description
+   */
+  async searchArticlesByDate(dateStr: string): Promise<Array<{ title: string; description: string; published_at: string }>> {
+    try {
+      const articles: Array<{ title: string; description: string; published_at: string }> = [];
+      const targetDate = new Date(dateStr);
+      const dateStart = targetDate.getTime();
+      const dateEnd = dateStart + 24 * 60 * 60 * 1000;
+
+      // Fetch from RSS feed
+      const response = await this.fetchFn(this.baseUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent': this.userAgent,
+          'Accept': 'application/rss+xml, application/xml, text/xml',
+        },
+      });
+
+      if (!response.ok) {
+        console.warn(`Meduza RSS returned status ${response.status}`);
+        return [];
+      }
+
+      const rssText = await response.text();
+
+      // Extract all items from RSS
+      const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+      let itemMatch;
+
+      while ((itemMatch = itemRegex.exec(rssText)) !== null) {
+        const itemContent = itemMatch[1];
+        
+        // Extract title
+        const titleMatch = itemContent.match(/<title>([\s\S]*?)<\/title>/);
+        const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '') : '';
+        
+        // Extract description
+        const descMatch = itemContent.match(/<description>([\s\S]*?)<\/description>/);
+        const description = descMatch ? descMatch[1].replace(/<[^>]*>/g, '') : '';
+        
+        // Extract pubDate
+        const pubDateMatch = itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+        if (pubDateMatch) {
+          const pubDateStr = pubDateMatch[1];
+          const pubTime = new Date(pubDateStr).getTime();
+
+          if (pubTime >= dateStart && pubTime < dateEnd) {
+            articles.push({
+              title,
+              description,
+              published_at: new Date(pubTime).toISOString(),
+            });
+          }
+        }
+      }
+
+      return articles;
+    } catch (error) {
+      console.warn('Error searching articles by date:', error instanceof Error ? error.message : 'Unknown error');
+      return [];
+    }
+  }
+
 
   private getStartOfToday(): Date {
     const now = new Date();

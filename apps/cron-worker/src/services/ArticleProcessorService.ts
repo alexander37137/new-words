@@ -56,12 +56,15 @@ export class ArticleProcessorService {
       const dateStart = targetDate;
       const dateEnd = targetDate + 24 * 60 * 60 * 1000; // Next day
 
+      let foundArticles = false;
+
       for (let i = 0; i < pubDateMatches.length; i++) {
         const pubDateText = pubDateMatches[i].replace(/<\/?pubDate>/g, '');
         const pubDate = new Date(pubDateText).getTime();
 
         // Check if article is within the target date range
         if (pubDate >= dateStart && pubDate < dateEnd) {
+          foundArticles = true;
           if (titleMatches[i]) {
             const titleText = titleMatches[i].replace(/<\/?title>/g, '');
             const wordsProcessed = await this.wordRepo.processText(titleText);
@@ -70,6 +73,24 @@ export class ArticleProcessorService {
           if (descriptionMatches[i]) {
             const descText = descriptionMatches[i].replace(/<\/?description>/g, '');
             const wordsProcessed = await this.wordRepo.processText(descText);
+            totalWords += wordsProcessed;
+          }
+        }
+      }
+
+      // If no articles found in RSS, try search API for historical data
+      if (!foundArticles) {
+        console.log(`No articles found in RSS for ${date}, trying search API...`);
+        const searchArticles = await this.meduzaRepo.searchArticlesByDate(date);
+        console.log(`Found ${searchArticles.length} articles via search API`);
+        
+        for (const article of searchArticles) {
+          if (article.title) {
+            const wordsProcessed = await this.wordRepo.processText(article.title);
+            totalWords += wordsProcessed;
+          }
+          if (article.description) {
+            const wordsProcessed = await this.wordRepo.processText(article.description);
             totalWords += wordsProcessed;
           }
         }
