@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 export default {
   displayName: 'word-count-db',
   preset: '../../../jest.preset.js',

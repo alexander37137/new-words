@@ -3,5 +3,10 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/meduza-api-client/src",
   "projectType": "library",
-  "tags": ["type:data"]
+  "tags": ["type:data"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
 }

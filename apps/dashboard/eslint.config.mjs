@@ -1,7 +1,22 @@
 import baseConfig from '../../eslint.config.mjs';
+import vueParser from 'vue-eslint-parser';
 
 export default [
   ...baseConfig,
+  {
+    ignores: ['**/node_modules/**', '**/.nuxt/**', '**/.output/**', '**/dist/**'],
+  },
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parser: vueParser,
+      parserOptions: {
+        parser: '@typescript-eslint/parser',
+        ecmaVersion: 2020,
+        sourceType: 'module',
+      },
+    },
+  },
   {
     files: ['**/*.json'],
     rules: {

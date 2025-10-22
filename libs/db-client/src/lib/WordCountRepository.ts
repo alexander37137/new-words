@@ -25,7 +25,7 @@ export class WordCountRepository {
     this.redis.on('error', (err) => console.error('Redis connection error:', err));
   }
 
-  async incrementWordCount(word: string, count: number = 1): Promise<number> {
+  async incrementWordCount(word: string, count = 1): Promise<number> {
     try {
       return await this.redis.incrby(`word:${word}`, count);
     } catch (error) {
@@ -44,7 +44,7 @@ export class WordCountRepository {
     }
   }
 
-  async getTopWords(limit: number = 100): Promise<Array<{ word: string; count: number }>> {
+  async getTopWords(limit = 100): Promise<Array<{ word: string; count: number }>> {
     try {
       // Get all word keys
       const keys = await this.redis.keys('word:*');
