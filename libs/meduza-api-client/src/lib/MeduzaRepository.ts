@@ -80,15 +80,17 @@ export class MeduzaRepository {
   }
 
   /**
-   * Search for articles on a specific date using Meduza RSS feed with pagination
+   * Search for articles on a specific date using Meduza RSS feed
    * @param dateStr Date in YYYY-MM-DD format
    * @returns Array of articles with title and description
    */
   async searchArticlesByDate(dateStr: string): Promise<Array<{ title: string; description: string; published_at: string }>> {
     try {
       const articles: Array<{ title: string; description: string; published_at: string }> = [];
-      const targetDate = new Date(dateStr);
-      const dateStart = targetDate.getTime();
+      
+      // Parse target date (YYYY-MM-DD) as UTC start of day
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const dateStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)).getTime();
       const dateEnd = dateStart + 24 * 60 * 60 * 1000;
 
       // Fetch from RSS feed
@@ -114,20 +116,21 @@ export class MeduzaRepository {
       while ((itemMatch = itemRegex.exec(rssText)) !== null) {
         const itemContent = itemMatch[1];
         
-        // Extract title
-        const titleMatch = itemContent.match(/<title>([\s\S]*?)<\/title>/);
-        const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '') : '';
+        // Extract title (remove CDATA)
+        const titleMatch = itemContent.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>|<title>([\s\S]*?)<\/title>/);
+        const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
         
-        // Extract description
-        const descMatch = itemContent.match(/<description>([\s\S]*?)<\/description>/);
-        const description = descMatch ? descMatch[1].replace(/<[^>]*>/g, '') : '';
+        // Extract description (remove CDATA)
+        const descMatch = itemContent.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description>([\s\S]*?)<\/description>/);
+        const description = descMatch ? (descMatch[1] || descMatch[2] || '').replace(/<[^>]*>/g, '').trim() : '';
         
         // Extract pubDate
-        const pubDateMatch = itemContent.match(/<pubDate>([\s\S]*?)<\/pubDate>/);
+        const pubDateMatch = itemContent.match(/<pubDate>([^<]+)<\/pubDate>/);
         if (pubDateMatch) {
           const pubDateStr = pubDateMatch[1];
           const pubTime = new Date(pubDateStr).getTime();
 
+          // Check if article is within the target date range (accounting for timezone)
           if (pubTime >= dateStart && pubTime < dateEnd) {
             articles.push({
               title,

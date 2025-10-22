@@ -50,16 +50,18 @@ export class ArticleProcessorService {
 
     // If date is provided, filter articles by publication date
     if (date) {
+      // Parse target date (YYYY-MM-DD) as UTC start of day
+      const [year, month, day] = date.split('-').map(Number);
+      const dateStart = new Date(Date.UTC(year, month - 1, day, 0, 0, 0)).getTime();
+      const dateEnd = dateStart + 24 * 60 * 60 * 1000; // Next day
+      
       // Extract pubDate elements to filter by date
       const pubDateMatches = rssText.match(/<pubDate>(.*?)<\/pubDate>/g) || [];
-      const targetDate = new Date(date).getTime();
-      const dateStart = targetDate;
-      const dateEnd = targetDate + 24 * 60 * 60 * 1000; // Next day
 
       let foundArticles = false;
 
       for (let i = 0; i < pubDateMatches.length; i++) {
-        const pubDateText = pubDateMatches[i].replace(/<\/?pubDate>/g, '');
+        const pubDateText = pubDateMatches[i].replace(/<\/?pubDate>/g, '').trim();
         const pubDate = new Date(pubDateText).getTime();
 
         // Check if article is within the target date range
@@ -113,6 +115,61 @@ export class ArticleProcessorService {
     }
 
     return totalWords;
+  }
+
+  /**
+   * Analyze entire RSS feed and group articles by date
+   */
+  async analyzeFullFeed(): Promise<Record<string, { wordsProcessed: number; articleCount: number }>> {
+    const rssResponse = await fetch(this.meduzaRepo.baseUrl);
+    const rssText = await rssResponse.text();
+
+    const stats: Record<string, { wordsProcessed: number; articleCount: number }> = {};
+
+    // Extract all items from RSS
+    const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+    let itemMatch;
+
+    while ((itemMatch = itemRegex.exec(rssText)) !== null) {
+      const itemContent = itemMatch[1];
+      
+      // Extract pubDate
+      const pubDateMatch = itemContent.match(/<pubDate>([^<]+)<\/pubDate>/);
+      if (!pubDateMatch) continue;
+
+      const pubDateStr = pubDateMatch[1].trim();
+      const pubDate = new Date(pubDateStr);
+      const dateKey = pubDate.toISOString().split('T')[0];
+
+      // Extract title (remove CDATA)
+      const titleMatch = itemContent.match(/<title><!\[CDATA\[([\s\S]*?)\]\]><\/title>|<title>([\s\S]*?)<\/title>/);
+      const title = titleMatch ? (titleMatch[1] || titleMatch[2] || '').trim() : '';
+      
+      // Extract description (remove CDATA)
+      const descMatch = itemContent.match(/<description><!\[CDATA\[([\s\S]*?)\]\]><\/description>|<description>([\s\S]*?)<\/description>/);
+      const description = descMatch ? (descMatch[1] || descMatch[2] || '').replace(/<[^>]*>/g, '').trim() : '';
+
+      // Initialize date stats if not exists
+      if (!stats[dateKey]) {
+        stats[dateKey] = { wordsProcessed: 0, articleCount: 0 };
+      }
+
+      stats[dateKey].articleCount++;
+
+      // Process title
+      if (title) {
+        const titleWords = await this.wordRepo.processText(title);
+        stats[dateKey].wordsProcessed += titleWords;
+      }
+
+      // Process description
+      if (description) {
+        const descWords = await this.wordRepo.processText(description);
+        stats[dateKey].wordsProcessed += descWords;
+      }
+    }
+
+    return stats;
   }
 
   /**
