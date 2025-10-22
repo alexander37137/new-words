@@ -122,7 +122,7 @@ export class WordCountRepository {
     const cleanText = decodedText
       .replace(/<!\[CDATA\[|\]\]>/g, '') // Remove CDATA tags
       .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/[^\w\s-]/g, ' ') // Keep word chars, spaces, hyphens
+      .replace(/[^\p{L}\p{N}\s'-]/gu, ' ') // Keep Unicode letters, numbers, spaces, hyphens, apostrophes
       .replace(/\s+/g, ' ') // Normalize whitespace
       .toLowerCase()
       .trim();
