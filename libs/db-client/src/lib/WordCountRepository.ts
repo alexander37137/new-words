@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { decode } from 'he';
+import he from 'he';
 
 export interface WordCountRepositoryOptions {
   host?: string;
@@ -116,7 +116,7 @@ export class WordCountRepository {
    */
   private extractWords(text: string): string[] {
     // Decode HTML entities using the 'he' library
-    const decodedText = decode(text);
+    const decodedText = he.decode(text);
 
     // Remove HTML tags and CDATA
     const cleanText = decodedText

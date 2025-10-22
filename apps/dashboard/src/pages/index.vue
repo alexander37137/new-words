@@ -62,10 +62,13 @@
       </div>
 
       <div class="actions">
-        <button @click="refresh" class="refresh-btn" :disabled="pending || clearing">
+        <button @click="refresh" class="refresh-btn" :disabled="pending || clearing || analyzing">
           {{ pending ? 'Loading...' : '🔄 Refresh Data' }}
         </button>
-        <button @click="clearDatabase" class="clear-btn" :disabled="pending || clearing">
+        <button @click="analyzeFeed" class="analyze-btn" :disabled="pending || clearing || analyzing">
+          {{ analyzing ? 'Analyzing...' : '📄 Analyze Feed' }}
+        </button>
+        <button @click="clearDatabase" class="clear-btn" :disabled="pending || clearing || analyzing">
           {{ clearing ? 'Clearing...' : '🗑️ Clear Database' }}
         </button>
       </div>
@@ -76,11 +79,27 @@
 <script setup lang="ts">
 const { data, pending, error, refresh } = await useFetch('/api/stats')
 const clearing = ref(false)
+const analyzing = ref(false)
 
 const getBarWidth = (count: number) => {
   if (!data.value?.topWords?.length) return '0%'
   const maxCount = data.value.topWords[0].count
   return `${(count / maxCount) * 100}%`
+}
+
+const analyzeFeed = async () => {
+  analyzing.value = true
+  try {
+    const result = await $fetch('/api/analyze', { method: 'POST' })
+    console.log('Feed analysis completed:', result)
+    await refresh()
+    alert('Feed analysis completed successfully!')
+  } catch (err) {
+    console.error('Error analyzing feed:', err)
+    alert('Failed to analyze feed')
+  } finally {
+    analyzing.value = false
+  }
 }
 
 const clearDatabase = async () => {
@@ -306,6 +325,28 @@ const clearDatabase = async () => {
 }
 
 .refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.analyze-btn {
+  background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.analyze-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.analyze-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }

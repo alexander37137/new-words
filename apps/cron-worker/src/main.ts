@@ -1,12 +1,12 @@
-import { ArticleProcessorService } from './services/ArticleProcessorService';
+import { FeedAnalyzer } from '@new-words/feed-analyzer';
 
 async function analyzeRssFeed(): Promise<void> {
-  const articleProcessor = new ArticleProcessorService();
+  const analyzer = new FeedAnalyzer();
 
   try {
     console.log('📝 Analyzing entire Meduza RSS feed...\n');
     
-    const stats = await articleProcessor.analyzeFullFeed();
+    const stats = await analyzer.analyzeFullFeed();
     
     console.log('\n📊 RSS Feed Analysis Results:');
     console.log('═'.repeat(60));
@@ -29,7 +29,7 @@ async function analyzeRssFeed(): Promise<void> {
     }
     process.exit(1);
   } finally {
-    await articleProcessor.disconnect();
+    await analyzer.disconnect();
   }
 }
 

@@ -37,10 +37,18 @@ export default defineNuxtConfig({
       db: {
         driver: 'memory'
       }
+    },
+    alias: {
+      '@new-words/meduza-api-client': '../../libs/meduza-api-client/src/index.ts',
+      '@new-words/db-client': '../../libs/db-client/src/index.ts',
+      '@new-words/feed-analyzer': '../../libs/feed-analyzer/src/index.ts'
     }
   },
   vite: {
     plugins: [nxViteTsPaths()],
+    ssr: {
+      noExternal: ['@new-words/meduza-api-client', '@new-words/db-client', '@new-words/feed-analyzer']
+    }
   },
   compatibilityDate: '2025-10-22',
   experimental: {
