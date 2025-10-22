@@ -1,0 +1,6 @@
+# Auto-load correct Node version when entering project directory
+if [ -f ~/.nvm/nvm.sh ]; then
+  source ~/.nvm/nvm.sh
+  # Auto-switch Node version based on .nvmrc
+  nvm use 2>/dev/null || nvm use default
+fi

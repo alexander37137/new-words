@@ -1,6 +1,9 @@
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { defineNuxtConfig } from 'nuxt/config';
 
+// Disable vue-macros to avoid module.createRequire error in build
+process.env.NUXT_DISABLE_VUE_MACROS = 'true';
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   workspaceDir: '../../',
@@ -19,6 +22,9 @@ export default defineNuxtConfig({
   imports: {
     autoImport: true,
   },
+  modules: [
+    // Disable vue-macros to avoid module.createRequire error
+  ],
   css: ['~/assets/css/styles.css'],
   nitro: {
     preset: 'node-server',
@@ -38,5 +44,11 @@ export default defineNuxtConfig({
   experimental: {
     payloadExtraction: false,
     viewTransition: false,
+  },
+  features: {
+    noScripts: true,
+  },
+  build: {
+    transpile: ['@vue-macros/nuxt'],
   },
 });

@@ -9,6 +9,10 @@
     "redis:cli": "docker compose exec redis redis-cli"
   },
   "private": true,
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "dependencies": {
     "empty": "0.10.1",
     "he": "^1.2.0",
