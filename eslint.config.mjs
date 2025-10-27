@@ -27,20 +27,15 @@ export default [
           ],
         },
       ],
+      // Essential rule for detecting unused code
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
-  },
-  {
-    files: [
-      '**/*.ts',
-      '**/*.tsx',
-      '**/*.cts',
-      '**/*.mts',
-      '**/*.js',
-      '**/*.jsx',
-      '**/*.cjs',
-      '**/*.mjs',
-    ],
-    // Override or add rules here
-    rules: {},
   },
 ];
