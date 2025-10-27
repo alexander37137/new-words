@@ -1,0 +1,17 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 300
+restartPolicyMaxRetries = 10
+
+[services.dashboard]
+buildCommand = "npx nx build dashboard --prod"
+startCommand = "npx nx serve dashboard --prod"
+healthcheckPath = "/"
+
+[services.cron-worker]
+buildCommand = "npx nx build cron-worker --prod"
+startCommand = "npx nx serve cron-worker --prod"
+cronSchedule = "0 0 * * *"
