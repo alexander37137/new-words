@@ -1,24 +1,21 @@
-import Redis from 'ioredis'
+import { FeedAnalyzer } from '@new-words/feed-analyzer';
 
 export default defineEventHandler(async () => {
-  const redis = new Redis({
-    host: 'localhost',
-    port: 6379
-  })
+  const analyzer = new FeedAnalyzer();
 
   try {
-    await redis.flushdb()
+    await analyzer.clearAll();
     return {
       success: true,
       message: 'Database cleared successfully'
-    }
+    };
   } catch (error) {
-    console.error('Error clearing database:', error)
+    console.error('Error clearing database:', error);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to clear database'
-    })
+    });
   } finally {
-    await redis.disconnect()
+    await analyzer.disconnect();
   }
-})
+});

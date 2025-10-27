@@ -189,6 +189,13 @@ export class FeedAnalyzer {
   }
 
   /**
+   * Clear all word count data
+   */
+  async clearAll(): Promise<void> {
+    await this.wordRepo.clearAll();
+  }
+
+  /**
    * Clean up resources
    */
   async disconnect(): Promise<void> {
