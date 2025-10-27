@@ -1,49 +1,22 @@
-import Redis from 'ioredis'
+import { FeedAnalyzer } from '@new-words/feed-analyzer';
 
 export default defineEventHandler(async () => {
-  const redis = new Redis({
-    host: 'localhost',
-    port: 6379
-  })
+  const analyzer = new FeedAnalyzer();
 
   try {
-    // Get all word keys
-    const keys = await redis.keys('word:*')
-
-    if (keys.length === 0) {
-      return {
-        totalWords: 0,
-        topWords: []
-      }
-    }
-
-    // Get word counts
-    const counts = await redis.mget(keys)
-
-    // Combine and sort
-    const words = keys.map((key, index) => ({
-      word: key.replace('word:', ''),
-      count: parseInt(counts[index] || '0', 10)
-    }))
-
-    const sortedWords = words
-      .filter(w => w.count > 0)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 10)
-
-    const totalWords = keys.length
+    const stats = await analyzer.getWordStats();
 
     return {
-      totalWords,
-      topWords: sortedWords
-    }
+      totalWords: stats.totalUniqueWords,
+      topWords: stats.topWords
+    };
   } catch (error) {
-    console.error('Error fetching word stats:', error)
+    console.error('Error fetching word stats:', error);
     throw createError({
       statusCode: 500,
       statusMessage: 'Failed to fetch word statistics'
-    })
+    });
   } finally {
-    await redis.disconnect()
+    await analyzer.disconnect();
   }
-})
+});
