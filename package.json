@@ -6,7 +6,9 @@
     "redis:start": "docker compose up -d",
     "redis:stop": "docker compose down",
     "redis:logs": "docker compose logs redis",
-    "redis:cli": "docker compose exec redis redis-cli"
+    "redis:cli": "docker compose exec redis redis-cli",
+    "prepare": "husky install",
+    "lint": "nx run-many --target=lint --all"
   },
   "private": true,
   "engines": {
@@ -46,8 +48,10 @@
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "h3": "^1.8.2",
+    "husky": "^9.0.0",
     "jiti": "2.4.2",
     "jsonc-eslint-parser": "^2.1.0",
+    "lint-staged": "^15.0.0",
     "nuxt": "^3.10.0",
     "nx": "21.6.5",
     "prettier": "^2.6.2",

@@ -1,0 +1,12 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 Running ESLint before push..."
+npx nx run-many --target=lint --all
+
+if [ $? -ne 0 ]; then
+  echo "❌ ESLint check failed. Fix the errors and try again."
+  exit 1
+fi
+
+echo "✅ ESLint check passed!"

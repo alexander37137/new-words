@@ -61,6 +61,51 @@
         </div>
       </div>
 
+      <div class="chart-section">
+        <h2>📊 Word Frequency Chart</h2>
+        <div v-if="!data?.topWords?.length" class="empty-state">
+          <p>No chart data available yet.</p>
+        </div>
+        <svg v-else :viewBox="`0 0 ${data.topWords.length * 60 + 100} ${getChartHeight() + 100}`" class="chart-svg">
+          <!-- Y-axis -->
+          <line x1="50" y1="20" x2="50" :y2="getChartHeight() + 20" stroke="#ddd" stroke-width="2" />
+          <!-- X-axis -->
+          <line x1="50" :y1="getChartHeight() + 20" :x2="data.topWords.length * 60 + 50" :y2="getChartHeight() + 20" stroke="#ddd" stroke-width="2" />
+          
+          <!-- Bars -->
+          <g v-for="(item, index) in data.topWords" :key="item.word">
+            <rect
+              :x="60 + index * 60"
+              :y="20 + (getChartHeight() - (item.count / getMaxCount()) * getChartHeight())"
+              width="40"
+              :height="(item.count / getMaxCount()) * getChartHeight()"
+              fill="rgba(102, 126, 234, 0.7)"
+              class="chart-bar"
+            />
+            <text
+              :x="80 + index * 60"
+              :y="getChartHeight() + 40"
+              text-anchor="middle"
+              font-size="12"
+              fill="#666"
+              class="chart-label"
+            >
+              {{ item.word }}
+            </text>
+            <text
+              :x="80 + index * 60"
+              :y="15 + (getChartHeight() - (item.count / getMaxCount()) * getChartHeight())"
+              text-anchor="middle"
+              font-size="11"
+              fill="#333"
+              font-weight="bold"
+            >
+              {{ item.count }}
+            </text>
+          </g>
+        </svg>
+      </div>
+
       <div class="actions">
         <button @click="refresh" class="refresh-btn" :disabled="pending || clearing || analyzing">
           {{ pending ? 'Loading...' : '🔄 Refresh Data' }}
@@ -85,6 +130,16 @@ const getBarWidth = (count: number) => {
   if (!data.value?.topWords?.length) return '0%'
   const maxCount = data.value.topWords[0].count
   return `${(count / maxCount) * 100}%`
+}
+
+const getChartHeight = () => {
+  if (!data.value?.topWords?.length) return 300
+  return Math.max(300, data.value.topWords.length * 30)
+}
+
+const getMaxCount = () => {
+  if (!data.value?.topWords?.length) return 1
+  return Math.max(...data.value.topWords.map(item => item.count))
 }
 
 const analyzeFeed = async () => {
@@ -207,6 +262,38 @@ const clearDatabase = async () => {
   color: #2c3e50;
   margin-bottom: 1.5rem;
   font-size: 1.8rem;
+}
+
+.chart-section {
+  margin-bottom: 3rem;
+}
+
+.chart-section h2 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e9ecef;
+  padding: 1rem;
+}
+
+.chart-bar {
+  transition: fill 0.2s ease;
+}
+
+.chart-bar:hover {
+  fill: rgba(102, 126, 234, 1);
+}
+
+.chart-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 .empty-state {
